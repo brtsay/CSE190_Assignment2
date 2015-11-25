@@ -1,4 +1,4 @@
-# CSE190 Assignment2
+# CSE190 Assignment 2
 
 ## Segmenting the data
 Run the following command from terminal:
