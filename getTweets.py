@@ -78,6 +78,12 @@ def extractTweets(write_dir, desired_tweets):
         for tweet in n_censored:
             writer.writerow(tweet)
 
+censored_all = "~/mpsaweibo/CSE190/censoredTweets.csv"
+censored_tweets = "~/mpsaweibo/CSE190/cens_tweets_seg.csv"
+noncensored_all = "~/mpsaweibo/CSE190/noncensoredTweets.csv"
+noncensored_tweets = "~/mpsaweibo/CSE190/noncens_tweets_seg.csv"
+all_list = [censored_all, ]
+
 def userDict(userdata, uid_list):
     """
     Generates dictionary with user attributes.
@@ -106,29 +112,60 @@ def userDict(userdata, uid_list):
     return(user_dict)
 
 
-def censoredDict(train_data):
+def metaDict(train_data):
     """
-    Gets number of censored tweets by user.
+    Creates dictionaries about users and messages.
+
+    This will create four dictionaries that measure how many times
+    the user/message have been censored and the popularity of users
+    and messages.
 
     Args:
         tweets: A string that indicates the path to the file with 
             the training data.
 
     Returns:
-        A dictionary that says how many times a user's tweet has
-        been censored in the training data.
+        Four dictionaries. The first measures how many times a user
+        has been censored. The second measures how many times a
+        message has been censored. In theory, everything should be a
+        1. The third measures how many times a user has been
+        retweeted. The fourth measures how many times a message has
+        been retweeted. Dictionaries must be accessed by 
+        dict[u'"key"']. 
     """
     with open(train_data, 'rb') as f:
         all_data = [row for row in f]
     cen_uid = defaultdict(int)
+    cen_mid = defaultdict(int)
+    cen_re_uid = defaultdict(int)
+    cen_re_mid = defaultdict(int)
     for obs in all_data:
-        if obs.decode('latin-1').split(',')[10].strip():
+        re_mid = obs.decode('latin-1').split(',')[1]
+        if re_mid.strip():
+            try:
+                cen_re_mid[re_mid] += 1
+            except KeyError:
+                cen_re_mid[re_mid] = 1
+        re_uid = obs.decode('latin-1').split(',')[3]
+        if re_uid.strip():
+            try:
+                cen_re_uid[re_uid] += 1
+            except KeyError:
+                cen_re_uid[re_uid] = 1
+        # 9 refers to the permission_denied column
+        if obs.decode('latin-1').split(',')[9].strip():
             uid = obs.decode('latin-1').split(',')[2]
             try:
                 cen_uid[uid] += 1
             except KeyError:
                 cen_uid[uid] = 1
-    return(cen_uid)
+            mid = obs.decode('latin-1').split(',')[0]
+            try:
+                # in theory this should never be triggered
+                cen_mid[mid] += 1
+            except KeyError:
+                cen_mid[mid] = 1
+    return(cen_uid, cen_mid, cen_re_uid, cen_re_mid)
 
 
 
