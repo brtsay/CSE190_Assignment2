@@ -111,10 +111,6 @@ def userDict(userdata, uid_path):
                 break
     return(user_dict)
 
-
-# reader = csv.reader(open('user_attr.csv', 'rb'))
-# mydict = dict(reader)
-
 def metaDict(train_data):
     """
     Creates dictionaries about users, messages, and the day.
@@ -129,14 +125,17 @@ def metaDict(train_data):
             with the training data.
  
     Returns:
-        Five dictionaries. The first measures how many times a user
-        has been censored. The second measures how many times a
-        message has been censored. In theory, everything should be a
-        1. The third measures how many times a user has been
-        retweeted. The fourth measures how many times a message has
-        been retweeted. The fifth has another dictionary inside which
-        measure the total number of tweets that day and the number of
-        tweets that day that had been censored.
+        cen_uid: The first measures how many times a user has been 
+            censored. 
+        cen_mid: The second measures how many times a message has 
+            been censored. In theory, everything should be a 1. 
+        cen_re_uid: The third measures how many times a user has been
+            retweeted. 
+        cen_re_mid: The fourth measures how many times a message has
+            been retweeted. 
+        day_dict: The fifth has another dictionary inside which
+            measure the total number of tweets that day and the 
+            number of tweets that day that had been censored.
 
     Dictionaries might have to be accessed by dict[u'"key"']. 
     """
@@ -185,7 +184,23 @@ def metaDict(train_data):
     return(cen_uid, cen_mid, cen_re_uid, cen_re_mid, day_dict)
 
 def createFeatures(data_path, train_path):
-    cen_uid, cen_mid, cen_re_uid, cen_re_mid = metaDict(train_path)
+    """
+    Creates feature vector for prediction
+
+    Args:
+        data_path: A string that indicates what data to create a
+            feature vector for.
+        train_path: A string that indicates the path to the training
+            data. This is used for creating the dictionaries.
+
+    Returns:
+        A vector of features that indicate the number of times a user
+        has been censored, the number of times the retweeted user has
+        been censored and the number of times a retweeted message 
+        has been censored (if the tweet is a retweet). Also has the
+        proportion of tweets that have been censored that day.
+    """
+    cen_uid, cen_mid, cen_re_uid, cen_re_mid, day_dict = metaDict(train_path)
     # with open(user_attr_path, 'rb') as f:
     #     reader = csv.reader(f)
     #     user_attr = dict(reader)
@@ -194,14 +209,20 @@ def createFeatures(data_path, train_path):
     # 0: num times user has been censored
     # 1: num times retweeted user has been censored
     # 2: num times retweeted message has been censored
+    # 3: proportion of tweets censored that day
     features = []
     for obs in data:
         uid = obs.decode('latin-1').split(',')[2]
         re_uid = obs.decode('latin-1').split(',')[3]
         re_mid = obs.decode('latin-1').split(',')[1]
+        day = obs.decode('latin-1').split(',')[7].split(' ')[0].replace('"', '')
         cens_ruid = 0 if re_uid=='""' else cen_re_uid[re_uid]
         cens_rmid = 0 if re_mid=='""' else cen_re_mid[re_mid]
-        features.append([cen_uid[uid], cens_ruid, cens_rmid])
+        try:
+            day_prop = day_dict[day]['cens']/day_dict[day]['total']
+        except KeyError:
+            day_prop = 0
+        features.append([cen_uid[uid], cens_ruid, cens_rmid, day_prop])
     return(features)
         
 
