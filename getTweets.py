@@ -10,6 +10,7 @@ import zipfile
 import StringIO
 import sys
 import re
+from collections import defaultdict
 
 def extractTweets(write_dir, desired_tweets):
     """
@@ -77,8 +78,29 @@ def extractTweets(write_dir, desired_tweets):
         for tweet in n_censored:
             writer.writerow(tweet)
 
+def censoredDict(train_data):
+    '''
+    Gets number of censored tweets by user.
 
+    Args:
+        tweets: A string that indicates the path to the file with 
+            the training data.
 
+    Returns:
+        A dictionary that says how many times a user's tweet has
+        been censored in the training data.
+    '''
+    with open(train_data, 'rb') as f:
+        all_data = [row for row in f]
+    cen_uid = defaultdict(int)
+    for obs in all_data:
+        if obs.decode('latin-1').split(',')[10].strip():
+            uid = obs.decode('latin-1').split(',')[2]
+            try:
+                cen_uid[uid] += 1
+            except KeyError:
+                cen_uid[uid] = 1
+    return(cen_uid)
 
 
 

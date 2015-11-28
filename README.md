@@ -22,4 +22,5 @@ Use the stopwords from [Baidu](http://www.baiduguide.com/baidu-stopwords/). Code
 
 ## Word Cloud
 ![Word cloud of censored tweets](https://github.com/brtsay/CSE190_Assignment2/blob/master/wordcloud_cens.png)
+
 The last task (if there's time) is to get an English version of the word cloud. Also to compare the censored tweets with the non-censored tweets. "Sparta" is a reference to 十八大, the 18th Party Congress. They are almost homophones in Mandarin.
