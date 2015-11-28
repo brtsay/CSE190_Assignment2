@@ -78,13 +78,7 @@ def extractTweets(write_dir, desired_tweets):
         for tweet in n_censored:
             writer.writerow(tweet)
 
-censored_all = "~/mpsaweibo/CSE190/censoredTweets.csv"
-censored_tweets = "~/mpsaweibo/CSE190/cens_tweets_seg.csv"
-noncensored_all = "~/mpsaweibo/CSE190/noncensoredTweets.csv"
-noncensored_tweets = "~/mpsaweibo/CSE190/noncens_tweets_seg.csv"
-all_list = [censored_all, ]
-
-def userDict(userdata, uid_list):
+def userDict(userdata, uid_path):
     """
     Generates dictionary with user attributes.
 
@@ -93,45 +87,58 @@ def userDict(userdata, uid_list):
 
     Args:
         userdata: A string that provides the path to userdata.zip
-        uid_list: A list of the desired UIDs (train, valid, test).
+        uid_path: A string that provides the path to a list of
+            UIDs (train).
 
     Returns:
         A dictionary with UID keys and province, gender, and verified
         values.
     """
-    zfile = zipfile.ZipFile(userdata)
-    data = StringIO.StringIO(zfile.read('userdata.csv'))
-    reader = csv.DictReader(data)
+    with open(uid_path) as f:
+        reader = csv.reader(f)
+        next(reader, None)                     # get rid of header
+        uid_list = [uid for uid in reader]
+    uid_list = [item for sublist in uid_list for item in sublist]
     user_dict = dict()
     for uid in uid_list:
-        if uid not in user_dict:
-            for row in reader:
-                if row['uid'] == uid:
-                    user_dict[row['uid']] = {'province': row['province'], 'gender': row['gender'], 'verified': row['verified']}
-                    break
+        zfile = zipfile.ZipFile(userdata)
+        data = StringIO.StringIO(zfile.read('userdata.csv'))
+        reader = csv.DictReader(data)
+        for row in reader:
+            if row['uid'] == uid:
+                user_dict[row['uid']] = {'province': row['province'], 'gender': row['gender'], 'verified': row['verified']}
+                print(len(user_dict))
+                break
     return(user_dict)
 
 
+# reader = csv.reader(open('user_attr.csv', 'rb'))
+# mydict = dict(reader)
+
 def metaDict(train_data):
     """
-    Creates dictionaries about users and messages.
+    Creates dictionaries about users, messages, and the day.
 
-    This will create four dictionaries that measure how many times
+    This will create five dictionaries that measure how many times
     the user/message have been censored and the popularity of users
-    and messages.
+    and messages. Also measures what proportion of tweets per day
+    are censored.
 
     Args:
-        tweets: A string that indicates the path to the file with 
-            the training data.
-
+        train_data: A string that indicates the path to the file 
+            with the training data.
+ 
     Returns:
-        Four dictionaries. The first measures how many times a user
+        Five dictionaries. The first measures how many times a user
         has been censored. The second measures how many times a
         message has been censored. In theory, everything should be a
         1. The third measures how many times a user has been
         retweeted. The fourth measures how many times a message has
-        been retweeted. Dictionaries must be accessed by 
-        dict[u'"key"']. 
+        been retweeted. The fifth has another dictionary inside which
+        measure the total number of tweets that day and the number of
+        tweets that day that had been censored.
+
+    Dictionaries might have to be accessed by dict[u'"key"']. 
     """
     with open(train_data, 'rb') as f:
         all_data = [row for row in f]
@@ -139,6 +146,7 @@ def metaDict(train_data):
     cen_mid = defaultdict(int)
     cen_re_uid = defaultdict(int)
     cen_re_mid = defaultdict(int)
+    day_dict = defaultdict(dict)
     for obs in all_data:
         re_mid = obs.decode('latin-1').split(',')[1]
         if re_mid.strip():
@@ -152,8 +160,13 @@ def metaDict(train_data):
                 cen_re_uid[re_uid] += 1
             except KeyError:
                 cen_re_uid[re_uid] = 1
+        day = obs.decode('latin-1').split(',')[7].split(' ')[0].replace('"', '')
+        try:
+            day_dict[day]['total'] += 1
+        except KeyError:
+            day_dict[day]['total'] = 1
         # 9 refers to the permission_denied column
-        if obs.decode('latin-1').split(',')[9].strip():
+        if obs.decode('latin-1').split(',')[9] == "TRUE":
             uid = obs.decode('latin-1').split(',')[2]
             try:
                 cen_uid[uid] += 1
@@ -165,7 +178,31 @@ def metaDict(train_data):
                 cen_mid[mid] += 1
             except KeyError:
                 cen_mid[mid] = 1
-    return(cen_uid, cen_mid, cen_re_uid, cen_re_mid)
+            try:
+                day_dict[day]['cens'] += 1
+            except KeyError:
+                day_dict[day]['cens'] = 1
+    return(cen_uid, cen_mid, cen_re_uid, cen_re_mid, day_dict)
 
+def createFeatures(data_path, train_path):
+    cen_uid, cen_mid, cen_re_uid, cen_re_mid = metaDict(train_path)
+    # with open(user_attr_path, 'rb') as f:
+    #     reader = csv.reader(f)
+    #     user_attr = dict(reader)
+    with open(data_path, 'rb') as f:
+        data = [row for row in f]
+    # 0: num times user has been censored
+    # 1: num times retweeted user has been censored
+    # 2: num times retweeted message has been censored
+    features = []
+    for obs in data:
+        uid = obs.decode('latin-1').split(',')[2]
+        re_uid = obs.decode('latin-1').split(',')[3]
+        re_mid = obs.decode('latin-1').split(',')[1]
+        cens_ruid = 0 if re_uid=='""' else cen_re_uid[re_uid]
+        cens_rmid = 0 if re_mid=='""' else cen_re_mid[re_mid]
+        features.append([cen_uid[uid], cens_ruid, cens_rmid])
+    return(features)
+        
 
 

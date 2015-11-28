@@ -38,7 +38,8 @@ write.table(valid, "~/Documents/CSE190_Data/pre_valid.csv", row.names = F, sep =
 write.table(test, "~/Documents/CSE190_Data/pre_test.csv", row.names = F, sep = ",")
 
 ## generate UIDs for making dictionary
-uid.list <- unique(c(cens$uid, cens$retweeted_uid, noncens$uid, noncens$retweeted_uid))
+train <- fread("~/Documents/CSE190_Data/pre_train.csv")
+uid.list <- sort(unique(c(train$uid, train$retweeted_uid)), decreasing=TRUE)
 write.table(uid.list, "~/Documents/CSE190_Data/uid_list.csv", row.names = FALSE, col.names = "uid")
 
 #####################################################################
