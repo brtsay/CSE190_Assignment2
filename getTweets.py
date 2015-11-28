@@ -78,8 +78,36 @@ def extractTweets(write_dir, desired_tweets):
         for tweet in n_censored:
             writer.writerow(tweet)
 
+def userDict(userdata, uid_list):
+    """
+    Generates dictionary with user attributes.
+
+    This function will create dictionary where the UID is the key and
+    has the province, gender, and verified status as values.
+
+    Args:
+        userdata: A string that provides the path to userdata.zip
+        uid_list: A list of the desired UIDs (train, valid, test).
+
+    Returns:
+        A dictionary with UID keys and province, gender, and verified
+        values.
+    """
+    zfile = zipfile.ZipFile(userdata)
+    data = StringIO.StringIO(zfile.read('userdata.csv'))
+    reader = csv.DictReader(data)
+    user_dict = dict()
+    for uid in uid_list:
+        if uid not in user_dict:
+            for row in reader:
+                if row['uid'] == uid:
+                    user_dict[row['uid']] = {'province': row['province'], 'gender': row['gender'], 'verified': row['verified']}
+                    break
+    return(user_dict)
+
+
 def censoredDict(train_data):
-    '''
+    """
     Gets number of censored tweets by user.
 
     Args:
@@ -89,7 +117,7 @@ def censoredDict(train_data):
     Returns:
         A dictionary that says how many times a user's tweet has
         been censored in the training data.
-    '''
+    """
     with open(train_data, 'rb') as f:
         all_data = [row for row in f]
     cen_uid = defaultdict(int)
