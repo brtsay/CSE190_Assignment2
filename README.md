@@ -18,7 +18,7 @@ Note that this will actually throw a lot of "private use area codepoint" errors.
 ## Cleaning
 Note that URLs need to be removed before segmenting.
 ### Stopwords
-Use the stopwords from [Baidu](http://www.baiduguide.com/baidu-stopwords/). Code for getting the words is in **createStopwords.py**. Actual stopwords are in **stopwords.txt**.
+Use the stopwords from this [Baidu SEO guide](http://www.baiduguide.com/baidu-stopwords/). I don't know the organization, but the stopwords seem right. Code for getting the words is in **createStopwords.py**. Actual stopwords are in **stopwords.txt**.
 
 ## Word Cloud
 ![Word cloud of censored tweets](https://github.com/brtsay/CSE190_Assignment2/blob/master/wordcloud_cens.png)
