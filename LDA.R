@@ -3,6 +3,9 @@ library(tm)
 library(topicmodels)
 library(slam)
 library(wordcloud)
+library(LiblineaR)
+library(SparseM)
+library(Matrix)
 
 ## generate train, validation, test sets
 cens.tweet <- fread("~/Documents/CSE190_Data/cens_tweets_seg.csv")
@@ -43,21 +46,59 @@ uid.list <- sort(unique(c(train$uid, train$retweeted_uid)), decreasing=TRUE)
 write.table(uid.list, "~/Documents/CSE190_Data/uid_list.csv", row.names = FALSE, col.names = "uid")
 
 #####################################################################
+setwd("/mainstorage/briant/mpsaweibo/CSE190")
 
-stopwords <- read.table("/media/b/DEF8DBF5F8DBC9C3/Users/B T/Copy/CSE190/Assignment/CSE190_Assignment2/stopwords.txt")
+## stopwords <- read.table("/media/b/DEF8DBF5F8DBC9C3/Users/B T/Copy/CSE190/Assignment/CSE190_Assignment2/stopwords.txt")
+stopwords <- read.table("stopwords.txt")
 stopwords <- enc2utf8(as.character(stopwords$V1))
 
 
 ## clean
+train <- fread("pre_train.csv")
+train.text <- train$text
 ## remove everything that starts with a u
-cens.text <- gsub("u.*", "", cens.text)
-cens.text.source <- Corpus(VectorSource(cens.text))
-cens.text.dtm <- DocumentTermMatrix(cens.text.source,
+train.text <- gsub("u.*", "", train.text)
+train.text.source <- Corpus(VectorSource(train.text))
+train.text.dtm <- DocumentTermMatrix(train.text.source,
                                control = list(removePunctuation = T,
                                               removeNumbers = T,
                                               stopwords = stopwords,
-                                              wordLengths = c(2, Inf)))
+                                              wordLengths = c(2, Inf),
+                                              weighting = function (x) weightTfIdf(x)
+                                              ))
+train.terms <- Terms(train.text.dtm)
 
+train.feat <- fread("train_feat.csv")
+train.feat <- as.simple_triplet_matrix(train.feat)
+## combine features and bag of words
+train.X <- cbind(train.text.dtm, train.feat)
+## convert to format that liblinear can use
+train.X <- sparseMatrix(train.X$i, train.X$j, x=train.X$v)
+train.X <- as(train.X, "matrix.csr")
+train.y <- train$permission_denied
+train.y[is.na(train.y)] <- 0
+
+valid <- fread("pre_valid.csv")
+valid.text <- valid$text
+## remove everything that starts with a u
+valid.text <- gsub("u.*", "", valid.text)
+valid.text.source <- Corpus(VectorSource(valid.text))
+valid.text.dtm <- DocumentTermMatrix(valid.text.source,
+                               control = list(removePunctuation = T,
+                                              removeNumbers = T,
+                                              stopwords = stopwords,
+                                              wordLengths = c(2, Inf),
+                                              dictionary = train.terms,
+                                              weighting = function (x) weightTfIdf(x)
+                                              ))
+
+findError <- function(pred, true) {sum(abs(pred$predictions - true)/length(true))}
+
+## train
+model <- LiblineaR(train.X, train.y)
+
+
+## pred.train <- predict(model, train.X)
 
 ## wordcloud
 stopwords.temp <- c(stopwords, "link", "the", "via")

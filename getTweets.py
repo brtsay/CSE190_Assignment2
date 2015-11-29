@@ -205,6 +205,7 @@ def createFeatures(data_path, train_path):
     #     reader = csv.reader(f)
     #     user_attr = dict(reader)
     with open(data_path, 'rb') as f:
+        header = next(f)
         data = [row for row in f]
     # 0: num times user has been censored
     # 1: num times retweeted user has been censored
@@ -225,5 +226,8 @@ def createFeatures(data_path, train_path):
         features.append([cen_uid[uid], cens_ruid, cens_rmid, day_prop])
     return(features)
         
-
+with open("/home/b/Documents/CSE190_Data/test_feat.csv", 'w') as f:
+    writer = csv.writer(f)
+    for item in a:
+        writer.writerow(item)
 
