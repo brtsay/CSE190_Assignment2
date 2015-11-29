@@ -70,18 +70,16 @@ train <- fread("pre_train.csv")
 valid <- fread("pre_valid.csv")
 test <- fread("pre_test.csv")
 attach("text_dtm.RData")
-train.text.dtm <- text.dtm[1:nrow(train),]
-valid.text.dtm <- text.dtm[(nrow(train)+1):(nrow(train)+nrow(valid)),]
-test.text.dtm <- text.dtm[(nrow(train)+nrow(valid)+1):nrow(text.dtm),]
 
 train.feat <- fread("train_feat.csv")
 valid.feat <- fread("valid_feat.csv")
 test.feat <- fread("test_feat.csv")
 
 mergeFeatures <- function(set, feat, text.dtm) {
-    feat <- as.simple_triplet_matrix(train.feat)
+    feat <- as.simple_triplet_matrix(feat)
     ## combine features and bag of words
     X <- cbind(text.dtm, feat)
+    ## X <- text.dtm
     ## convert to format that liblinear can use
     X <- sparseMatrix(X$i, X$j, x=X$v)
     X <- as(X, "matrix.csr")
@@ -90,15 +88,21 @@ mergeFeatures <- function(set, feat, text.dtm) {
     return(list(X,y))
 }
 
-train.data <- mergeFeatures(train, train.feat, train.text.dtm)
-valid.data <- mergeFeatures(valid, valid.feat, valid.text.dtm)
-
-
 findError <- function(pred, true) {sum(abs(pred$predictions - true)/length(true))}
 
-## train
-model <- LiblineaR(train.X, train.y)
+## dtm <- removeSparseTerms(text.dtm, 0.9999)
+train.text.dtm <- dtm[1:nrow(train),]
+valid.text.dtm <- dtm[(nrow(train)+1):(nrow(train)+nrow(valid)),]
+test.text.dtm <- dtm[(nrow(train)+nrow(valid)+1):nrow(text.dtm),]
 
+train.data <- mergeFeatures(train, train.feat, train.text.dtm)
+valid.data <- mergeFeatures(valid, valid.feat, valid.text.dtm)
+test.data <- mergeFeatures(test, test.feat, test.text.dtm)
+
+## train
+model <- LiblineaR(train.data[[1]], train.data[[2]], cost=0.1)
+pred.valid <- predict(model, valid.data[[1]])
+print(findError(pred.valid, valid.data[[2]]))
 
 ## pred.train <- predict(model, train.X)
 
