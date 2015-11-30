@@ -57,7 +57,7 @@ stopwords <- enc2utf8(as.character(stopwords$V1))
 
 ## clean (run on server)
 ## text <- c(train$text, valid$text, test$text)
-## text <- gsub("u.*", "", text)
+## text <- gsub("u.*?\\s", "", text)
 ## text.source <- Corpus(VectorSource(text))
 ## text.dtm <- DocumentTermMatrix(text.source,
 ##                                control = list(removePunctuation = T,
