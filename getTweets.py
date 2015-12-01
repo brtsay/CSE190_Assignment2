@@ -128,7 +128,7 @@ def metaDict(train_data):
         cen_uid: The first measures how many times a user has been 
             censored. 
         cen_mid: The second measures how many times a message has 
-            been censored. In theory, everything should be a 1. 
+            been censored. In theory, everything should be a 1 or 0. 
         cen_re_uid: The third measures how many times a user has been
             retweeted. 
         cen_re_mid: The fourth measures how many times a message has
@@ -141,7 +141,7 @@ def metaDict(train_data):
     """
     with open(train_data, 'rb') as f:
         all_data = [row for row in f]
-    cen_uid = defaultdict(int)
+    cen_uid = defaultdict(dict)
     cen_mid = defaultdict(int)
     cen_re_uid = defaultdict(int)
     cen_re_mid = defaultdict(int)
@@ -164,13 +164,17 @@ def metaDict(train_data):
             day_dict[day]['total'] += 1
         except KeyError:
             day_dict[day]['total'] = 1
+        uid = obs.decode('latin-1').split(',')[2]
+        try:
+            cen_uid[uid]['total'] += 1
+        except KeyError:
+            cen_uid[uid]['total'] = 1
         # 9 refers to the permission_denied column
         if obs.decode('latin-1').split(',')[9] == "TRUE":
-            uid = obs.decode('latin-1').split(',')[2]
             try:
-                cen_uid[uid] += 1
+                cen_uid[uid]['cens'] += 1
             except KeyError:
-                cen_uid[uid] = 1
+                cen_uid[uid]['cens'] = 1
             mid = obs.decode('latin-1').split(',')[0]
             try:
                 # in theory this should never be triggered
@@ -207,27 +211,44 @@ def createFeatures(data_path, train_path):
     with open(data_path, 'rb') as f:
         header = next(f)
         data = [row for row in f]
-    # 0: num times user has been censored
-    # 1: num times retweeted user has been censored
-    # 2: num times retweeted message has been censored
+    # 0: proportion of user's tweets that have been censored
+    # 1: num times user has been retweeted
+    # 2: num times message has been retweeted
     # 3: proportion of tweets censored that day
+    # 4: proportion of retweeted user's tweets that have been censored
+    # 5: num times retweeted message has been censored
     features = []
     for obs in data:
         uid = obs.decode('latin-1').split(',')[2]
+        mid = obs.decode('latin-1').split(',')[0]
         re_uid = obs.decode('latin-1').split(',')[3]
         re_mid = obs.decode('latin-1').split(',')[1]
         day = obs.decode('latin-1').split(',')[7].split(' ')[0].replace('"', '')
-        cens_ruid = 0 if re_uid=='""' else cen_re_uid[re_uid]
-        cens_rmid = 0 if re_mid=='""' else cen_re_mid[re_mid]
+        # re_ruid = 0 if re_uid=='""' else cen_re_uid[uid]
+        # re_rmid = 0 if re_mid=='""' else cen_re_mid[mid]
+        re_ruid = cen_re_uid[uid]
+        re_rmid = cen_re_mid[mid]
         try:
             day_prop = day_dict[day]['cens']/day_dict[day]['total']
         except KeyError:
             day_prop = 0
-        features.append([cen_uid[uid], cens_ruid, cens_rmid, day_prop])
+        try:
+            cens_uid = cen_uid[uid]['cens']/cen_uid[uid]['total']
+        except KeyError:
+            cens_uid = 0
+        try:
+            cens_ruid = cen_uid[re_uid]['cens']/cen_uid[re_uid]['total']
+        except KeyError:
+            cens_ruid = 0
+        try:
+            cens_rmid = cen_mid[re_rmid]
+        except KeyError:
+            cens_rmid = 0
+        features.append([cens_uid, re_ruid, re_rmid, day_prop, cens_ruid, cens_rmid])
     return(features)
         
-with open("/home/b/Documents/CSE190_Data/test_feat.csv", 'w') as f:
-    writer = csv.writer(f)
-    for item in a:
-        writer.writerow(item)
+# with open("/home/b/Documents/CSE190_Data/valid_feat.csv", 'w') as f:
+#     writer = csv.writer(f)
+#     for item in a:
+#         writer.writerow(item)
 

@@ -20,6 +20,15 @@ Note that URLs need to be removed before segmenting.
 ### Stopwords
 Use the stopwords from this [Baidu SEO guide](http://www.baiduguide.com/baidu-stopwords/). I don't know the organization, but the stopwords seem right. Code for getting the words is in **createStopwords.py**. Actual stopwords are in **stopwords.txt**.
 
+## Creating tweet meta features
+To create the features of tweet metadata, run the `createFeatures` function in **getTweets.py**. The function will generate feature vectors for the Weibo data provided. These features will be generated using *only* the training set. The resulting features vector will have 6 columns:
+1. The proportion of the user's tweets that have been censored.
+2. The number of times the user has been retweeted.
+3. The number of times the tweet has been retweeted.
+4. The proportion of tweets that were censored that day.
+5. The proportion of the retweeted user's tweets that have been censored, if the tweet is a retweet.
+6. The number of times that a retweeted message has been censored (for our training set, this will always be 0).
+
 ## Word Cloud
 ![Word cloud of censored tweets](https://github.com/brtsay/CSE190_Assignment2/blob/master/wordcloud_cens.png)
 
