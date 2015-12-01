@@ -255,7 +255,7 @@ print(findError(pred.valid, valid.data[[2]]))
 ## wordcloud
 stopwords.temp <- c(stopwords, "link", "the", "via")
 cens <- fread("cens_tweets_seg.csv")
-cens <- gsub("u.*", "", cens)
+cens <- gsub("u.*?\\s", "", cens)
 text.source <- Corpus(VectorSource(cens))
 text.source <- tm_map(text.source, removePunctuation)
 text.source <- tm_map(text.source, removeNumbers)

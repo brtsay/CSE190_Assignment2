@@ -46,8 +46,18 @@
 \ccsdesc[300]{Applied computing~Law, social and behavioral sciences}
 \printccsdesc
 
-\section{Dataset} % need time series plot
+\section{Dataset} \label{sec:data}
+% need time series plot
 The data used for this assignment is taken from the \href{http://weiboscope.jmsc.hku.hk/datazip/}{Weiboscope} data collection and visualization project developed by the research team at the Journalism and Media Studies Centre, The University of Hong Kong \cite{Fu2013a}. The dataset consists of weibos (roughly the Chinese equivalent of tweets) collected in the year 2012. The authors created the dataset by first compiling a list of Weibo users with 1,000 or more followers and then getting their timelines, friends, and followers. Within the entire dataset, there are 226,841,122 tweets from 14,387,628 unique users. Of these tweets, 86,083 (about 0.03\%) are censored.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale = 0.52]{wordcloud_cens.png}
+  \caption{Censored Tweets Word Cloud}
+  \label{fig:wordcloud}
+\end{figure}
+
+Figure~\ref{fig:wordcloud} 
 
 For the assignment, we kept all the censored tweets but kept only a small subsample (0.1\%) of the noncensored tweets. Noncensored tweets were randomly sampled from the entire dataset such that the number of noncensored tweets would be roughly twice that as the number of censored tweets within our data.\footnote{There was no particular reason that this ratio was chosen.} Whereas 0.03\% of tweets are censored in the entire dataset, 34\% of tweets are censored in our small subsample. The training set was constructed such that half of the tweets would be censored while the other half would be noncensored. The validation and test sets were deliberately constructed to look like one another. 
 
@@ -70,7 +80,11 @@ Table~\ref{tab:descript} shows some descriptive statistics for our dataset. It a
   \caption{Dataset Statistics}
   \label{tab:descript}
 \end{table*}
+
 \section{Predictive Task} \label{sec:pred}
+We would like to predict which tweets are censored in this dataset i.e. a binary-class prediction. To evaluate our model, we will simply use classification accuracy -- the proportion of tweets that are labelled correctly. If we were Chinese government censors, then perhaps we would evaluate recall or $F_\beta$ instead.\footnote{Recall that $F_\beta = (1+\beta^2) \cdot \frac{\text{precision} \cdot \text{recall}}{\beta^2 \text{precision} + \text{recall}}$} The idea is that a government censor would prefer flagging a ``harmless'' tweet for censorship over accidentally letting a ``harmful'' tweet through. We are [fortunately] not Chinese government censors, so we will stick with evaluating our model using classification accuracy. Our data are split into training, validation, and test sets using the procedure described in Section~\ref{sec:pred}
+
+
 
 \section{Model}
 
