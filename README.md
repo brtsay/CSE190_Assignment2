@@ -24,3 +24,6 @@ Use the stopwords from this [Baidu SEO guide](http://www.baiduguide.com/baidu-st
 ![Word cloud of censored tweets](https://github.com/brtsay/CSE190_Assignment2/blob/master/wordcloud_cens.png)
 
 The last task (if there's time) is to get an English version of the word cloud. Also to compare the censored tweets with the non-censored tweets. "Sparta" is a reference to 十八大, the 18th Party Congress. They are almost homophones in Mandarin.
+
+## Writeup
+To get the **assignment2writeup.tex** file to compile, you need the [ACM style file](http://www.acm.org/publications/article-templates/sig-alternate-05-2015.cls) and the [ACM copyright file](http://www.acm.org/publications/article-templates/acmcopyright.sty). I just put these in the same directory as the **assignment2writeup.tex**.

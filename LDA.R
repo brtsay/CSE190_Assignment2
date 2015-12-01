@@ -195,12 +195,14 @@ for (i in 1:length(costs)) {
 logit.df <- data.frame(costs, (1-logit.errors))
 svm.df <- data.frame(costs, (1-svm.errors))
 
-png("/media/b/DEF8DBF5F8DBC9C3/Users/B T/Copy/CSE190/Assignment/CSE190_Assignment2/valid_cost.png")
+png("/media/b/DEF8DBF5F8DBC9C3/Users/B T/Copy/CSE190/Assignment/CSE190_Assignment2/valid_cost48.png")
+
 plot(svm.df, log="x", type="o",
-     main="Validation Set Accuracy (915 Terms)",
+     main="Validation Set Accuracy (48 Terms)",
      xlab = "Cost", ylab = "Accuracy")
 lines(logit.df, log="x", type = "o", pch = 0, lty = 2,  col = "blue")
 legend(1e-4, 0.910, lty = c(1, 2), pch = c(1,0), col=c("black", "blue"),c("SVM (L2)", "Logistic (L2)"))
+
 dev.off()
 
 
