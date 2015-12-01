@@ -1,5 +1,13 @@
 # CSE190 Assignment 2
 
+## TODO List
+1. Validation error plots
+2. Time series chart of censored/total tweets over time (by day or by week?)
+3. Other models e.g. kNN?
+4. Making some sort of baseline from the [original paper](http://www.computer.org/csdl/mags/ic/2013/03/mic2013030042-abs.html).
+5. Adding word cloud of noncensored tweets.
+6. Translating word clouds (this should literally be the last thing to possibly do).
+
 ## Getting the data
 The file **getTweets.py** contains a function that can extract censored and noncensored tweets from the entire dataset. To use it, upload **getTweets.py** to the HNG server and run
 ```python
