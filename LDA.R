@@ -6,7 +6,7 @@ library(wordcloud)
 library(LiblineaR)
 library(SparseM)
 library(Matrix)
-library(e1071)
+
 
 ## generate train, validation, test sets
 cens.tweet <- fread("~/Documents/CSE190_Data/cens_tweets_seg.csv")
@@ -66,6 +66,23 @@ stopwords <- enc2utf8(as.character(stopwords$V1))
 ##                                               wordLengths = c(2, Inf),
 ##                                               weighting = function (x) weightTfIdf(x)
 ##                                               ))
+
+## load in data
+train <- fread("pre_train.csv")
+valid <- fread("pre_valid.csv")
+test <- fread("pre_test.csv")
+
+## descriptives
+all <- rbind(train, valid, test)
+## censored
+prodStats <- function(data) {
+    n.cens <- sum(data$permission_denied, na.rm=TRUE)
+    n.noncens <- nrow(data) - sum(data$permission_denied, na.rm=TRUE)
+    n <- nrow(data)
+    n.retweet <- nrow(data[data$retweeted_uid != ""])
+    n.user <- length(unique(data$uid))
+    return(list(n.cens, n.noncens, n, n.retweet, n.user))
+}
 
 ## load in text dtm
 train <- fread("pre_train.csv")
