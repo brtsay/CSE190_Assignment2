@@ -97,7 +97,8 @@ findError <- function(pred, true) {sum(abs(pred$predictions - true)/length(true)
 ## 48, 1451, 12849, 66771
 ## sparseness <- c(0.995, 0.999999)
 ## 141, 229334
-sparseness <- c(0.99995, 0.999991)
+sparseness <- c(0.99, 0.995, 0.999, 0.9999, 0.99999, 0.999999)
+## [1]     48    141   1451  12849  66771 229334
 logit.errors <- rep(0, length(sparseness))
 svm.errors <- rep(0, length(sparseness))
 num.terms <- rep(0, length(sparseness))
@@ -152,11 +153,11 @@ save(svm.nterms, file = "svm_nterms.RData")
 
 png("/media/b/DEF8DBF5F8DBC9C3/Users/B T/Copy/CSE190/Assignment/CSE190_Assignment2/valid_numTerms.png")
 
-plot(svm.terms.cost, type='o',
+plot(svm.terms.cost, type='o', log = "x",
      main = "Validation Set Accuracy (Cost = 1)",
      xlab = "Number of Terms", ylab = "Accuracy")
 lines(logit.terms.cost, type="o", pch = 0, lty=2, col = "blue")
-legend(150000, 0.915, lty = c(1, 2), pch = c(1,0), col=c("black", "blue"),c("SVM (L2)", "Logistic (L2)"))
+legend(50, 0.926, lty = c(1, 2), pch = c(1,0), col=c("black", "blue"),c("SVM (L2)", "Logistic (L2)"))
 
 dev.off()
 

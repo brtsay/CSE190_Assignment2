@@ -1,5 +1,15 @@
 \documentclass{sig-alternate-05-2015}
 
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
 \begin{document}
 \title{Predicting Censorship on Weibo}
 
@@ -37,7 +47,9 @@
 \printccsdesc
 
 \section{Dataset}
+The data used for this assignment is taken from [asdfds] and the \href{http://weiboscope.jmsc.hku.hk/datazip/}{Weiboscope} data collection and visualization project developed by the research team at the Journalism and Media Studies Centre, The University of Hong Kong. The dataset consists of weibos (roughly the Chinese equivalent of tweets) collected in the year 2012. Within the entire dataset, there are 226,841,122 tweets from 14,387,628 unique users. Of these tweets, 86,083 (about 0.03\%) are censored. % cite sources, describe sampling methodology
 
+For the assignment, we kept all the censored tweets but kept only a small subsample of the noncensored tweets. 
 \section{Predictive Task}
 
 \section{Model}
