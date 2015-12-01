@@ -66,6 +66,7 @@ stopwords <- enc2utf8(as.character(stopwords$V1))
 ##                                               wordLengths = c(2, Inf),
 ##                                               weighting = function (x) weightTfIdf(x)
 ##                                               ))
+
 ## load in text dtm
 train <- fread("pre_train.csv")
 valid <- fread("pre_valid.csv")
@@ -91,13 +92,14 @@ mergeFeatures <- function(set, feat, text.dtm) {
 
 findError <- function(pred, true) {sum(abs(pred$predictions - true)/length(true))}
 
-## SVM loop for multiple sparseness
-## sparseness <- c(0.99, 0.992, 0.995, 0.997,  0.999, 0.9999, 0.99999)
-## sparseness <- c(0.9905, 0.991, 0.9915)
-## sparseness <- c(0.998, 0.9992, 0.9995, 0.9997)
-## sparseness <- c(0.999995, 0.999997, 0.999999)
-sparseness <- c(0.99, 0.992, 0.995, 0.997,  0.999, 0.9999, 0.99999, 0.9905, 0.991, 0.9915, 0.998, 0.9992, 0.9995, 0.9997, 0.999995, 0.999997)
-errors <- rep(0, length(sparseness))
+## loop for multiple sparseness
+## sparseness <- c(0.99, 0.999, 0.9999, 0.99999)
+## 48, 1451, 12849, 66771
+## sparseness <- c(0.995, 0.999999)
+## 141, 229334
+sparseness <- c(0.99995, 0.999991)
+logit.errors <- rep(0, length(sparseness))
+svm.errors <- rep(0, length(sparseness))
 num.terms <- rep(0, length(sparseness))
 
 ## sparseness
@@ -115,31 +117,47 @@ for (i in 1:length(sparseness)) {
     test.data <- mergeFeatures(test, test.feat, test.text.dtm)
 
     ## train
-    model <- LiblineaR(train.data[[1]], train.data[[2]])
-    pred.valid <- predict(model, valid.data[[1]])
-    model.error <- findError(pred.valid, valid.data[[2]])
-    print(model.error)
-    errors[i] <- model.error
+    logit.model <- LiblineaR(train.data[[1]], train.data[[2]])
+    pred.logit <- predict(logit.model, valid.data[[1]])
+    logit.error <- findError(pred.logit, valid.data[[2]])
+    print(paste("logit:", logit.error))
+    logit.errors[i] <- logit.error
+
+    svm.model <- LiblineaR(train.data[[1]], train.data[[2]], type = 1)
+    pred.svm <- predict(svm.model, valid.data[[1]])
+    svm.error <- findError(pred.svm, valid.data[[2]])
+    print(paste("svm:", svm.error))
+    svm.errors[i] <- svm.error
 }
 
-temp.df <- data.frame(num.terms, (1-errors))
-names(temp.df) <- c("num.terms", "acc")
+## svm.terms.cost <- data.frame(num.terms, (1-svm.errors))
+## names(svm.terms.cost) <- c("num.terms", "acc")
+## logit.terms.cost <- data.frame(num.terms, (1-logit.errors))
+## names(logit.terms.cost) <- c("num.terms", "acc")
 
 ## svm.results <- data.frame(num.terms, (1-errors))
-names(svm.results) <- c("num.terms", "acc")
-svm.results <- rbind(svm.results, temp.df)
-svm.nterms <- svm.results
+temp.logit <- data.frame(num.terms, (1-logit.errors))
+names(temp.logit) <- c("num.terms", "acc")
+temp.svm <- data.frame(num.terms, (1-svm.errors))
+names(temp.svm) <- c("num.terms", "acc")
+
+svm.terms.cost <- rbind(svm.terms.cost, temp.svm)
+logit.terms.cost <- rbind(logit.terms.cost, temp.logit)
+svm.terms.cost <- svm.terms.cost[order(svm.terms.cost$num.terms),]
+logit.terms.cost <- logit.terms.cost[order(logit.terms.cost$num.terms),]
+
 
 save(svm.nterms, file = "svm_nterms.RData")
 
-svm.results <- svm.results[order(svm.results$num.terms),]
 
 png("/media/b/DEF8DBF5F8DBC9C3/Users/B T/Copy/CSE190/Assignment/CSE190_Assignment2/valid_numTerms.png")
-plot(svm.results, type='o',
+
+plot(svm.terms.cost, type='o',
      main = "Validation Set Accuracy (Cost = 1)",
      xlab = "Number of Terms", ylab = "Accuracy")
-lines(temp.df, type="o", pch = 0, lty=2, col = "blue")
-legend(120000, 0.905, lty = c(1, 2), pch = c(1,0), col=c("black", "blue"),c("SVM (L2)", "Logistic (L2)"))
+lines(logit.terms.cost, type="o", pch = 0, lty=2, col = "blue")
+legend(150000, 0.915, lty = c(1, 2), pch = c(1,0), col=c("black", "blue"),c("SVM (L2)", "Logistic (L2)"))
+
 dev.off()
 
 
@@ -148,7 +166,7 @@ svm.errors <- rep(0, length(costs))
 logit.errors <- rep(0, length(costs))
 
 for (i in 1:length(costs)) {
-    dtm <- removeSparseTerms(text.dtm, 0.999)
+    dtm <- removeSparseTerms(text.dtm, 0.99)
     ## dtm <- text.dtm
     
     train.text.dtm <- dtm[1:nrow(train),]
@@ -179,7 +197,7 @@ svm.df <- data.frame(costs, (1-svm.errors))
 
 png("/media/b/DEF8DBF5F8DBC9C3/Users/B T/Copy/CSE190/Assignment/CSE190_Assignment2/valid_cost.png")
 plot(svm.df, log="x", type="o",
-     main="Validation Accuracy (915 Terms)",
+     main="Validation Set Accuracy (915 Terms)",
      xlab = "Cost", ylab = "Accuracy")
 lines(logit.df, log="x", type = "o", pch = 0, lty = 2,  col = "blue")
 legend(1e-4, 0.910, lty = c(1, 2), pch = c(1,0), col=c("black", "blue"),c("SVM (L2)", "Logistic (L2)"))
