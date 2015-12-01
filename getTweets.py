@@ -10,7 +10,10 @@ import zipfile
 import StringIO
 import sys
 import re
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from collections import defaultdict
+from datetime import datetime
 
 def extractTweets(write_dir, desired_tweets):
     """
@@ -246,7 +249,50 @@ def createFeatures(data_path, train_path):
             cens_rmid = 0
         features.append([cens_uid, re_ruid, re_rmid, day_prop, cens_ruid, cens_rmid])
     return(features)
-        
+
+paths = ['/home/b/Documents/CSE190_Data/pre_train.csv', '/home/b/Documents/CSE190_Data/pre_valid.csv', '/home/b/Documents/CSE190_Data/pre_test.csv']
+day_ts = defaultdict(dict)
+for path in paths:
+    with open(path, 'rb') as f:
+        header = next(f)
+        data = [row for row in f]
+        for obs in data:
+            day = obs.decode('latin-1').split(',')[7].split(' ')[0].replace('"', '')
+            try:
+                day_ts[day]['total'] += 1
+            except KeyError:
+                day_ts[day]['total'] = 1
+            if obs.decode('latin-1').split(',')[9] == "TRUE":
+                try:
+                    day_ts[day]['censored'] += 1
+                except KeyError:
+                    day_ts[day]['censored'] = 1
+
+day_list = [val for val in day_ts.items()]
+day_list.sort(key=lambda tup: tup[0])
+dates = [datetime.strptime(row[0], '%Y-%m-%d') for row in day_list]
+cens = []
+for row in day_list:
+    try:
+        cens.append(row[1]['censored'])
+    except KeyError:
+        cens.append(0)
+total = [row[1]['total'] for row in day_list]
+non_cens = [x-y for x,y in zip(total, cens)]
+
+fig = plt.figure()
+plot_date(dates, total, 'b-', label = 'Total')
+plot_date(dates, cens, 'g-', label = 'Censored')
+plot_date(dates, non_cens, 'y-', label = 'Noncensored')
+# plt.fill(dates, cens, 'r')
+fig.autofmt_xdate()
+plt.xlabel('Date')
+plt.ylabel('Number of Tweets')
+plt.title('Tweets Over 2012')
+plt.legend()
+plt.savefig('tweetTime.png')
+# plt.show()
+
 # with open("/home/b/Documents/CSE190_Data/valid_feat.csv", 'w') as f:
 #     writer = csv.writer(f)
 #     for item in a:

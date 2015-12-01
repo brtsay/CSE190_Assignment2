@@ -254,13 +254,22 @@ print(findError(pred.valid, valid.data[[2]]))
 
 ## wordcloud
 stopwords.temp <- c(stopwords, "link", "the", "via")
-cens <- fread("cens_tweets_seg.csv")
-cens <- gsub("u.*?\\s", "", cens)
+## cens <- fread("cens_tweets_seg.csv")
+cens <- fread("noncens_tweets_seg.csv")
+## cens <- gsub("u\\w+ *", "", cens$text)
+cens <- unlist(lapply(cens, function(x) gsub("[A-Za-z0-9]\\w+ *", "", x)))
 text.source <- Corpus(VectorSource(cens))
 text.source <- tm_map(text.source, removePunctuation)
 text.source <- tm_map(text.source, removeNumbers)
 text.source <- tm_map(text.source, removeWords, stopwords.temp)
-wordcloud(text.source, min.freq = 50, colors = brewer.pal(8,"Dark2"))
+
+
+
+## png("wc_cens.png")
+png("wc_noncens.png")
+wordcloud(text.source, max.words = 150, colors = brewer.pal(8,"Dark2"))
+dev.off()
+
 
 ## get rid of empty rows so that lda can proceed
 row.totals <- rowapply_simple_triplet_matrix(text.dtm, sum)
