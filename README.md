@@ -22,6 +22,7 @@ Use the stopwords from this [Baidu SEO guide](http://www.baiduguide.com/baidu-st
 
 ## Creating tweet meta features
 To create the features of tweet metadata, run the `createFeatures` function in **getTweets.py**. The function will generate feature vectors for the Weibo data provided. These features will be generated using *only* the training set. The resulting features vector will have 6 columns:
+
 1. The proportion of the user's tweets that have been censored.
 2. The number of times the user has been retweeted.
 3. The number of times the tweet has been retweeted.
