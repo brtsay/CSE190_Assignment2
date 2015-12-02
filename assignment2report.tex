@@ -101,7 +101,7 @@ In other words, there are many factors at play in determining whether a tweet is
 \section{Predictive Task} \label{sec:pred}
 We would like to predict which tweets are censored in this dataset i.e. a binary-class prediction. To evaluate our model, we will simply use classification accuracy -- the proportion of tweets that are labelled correctly. If we were Chinese government censors, then perhaps we would evaluate recall or $F_\beta$ instead.\footnote{Recall that $F_\beta = (1+\beta^2) \cdot \frac{\text{precision} \cdot \text{recall}}{\beta^2 \text{precision} + \text{recall}}$} The idea is that a government censor would prefer flagging a ``harmless'' tweet for censorship over accidentally letting a ``harmful'' tweet through. We are [fortunately] not Chinese government censors, so we will stick with evaluating our model using classification accuracy. 
 
-Our data are split into training, validation, and test sets using the procedure described in Section~\ref{sec:pred}. We purposely oversampled censored tweets (by including literally all of them) in our training, validation, and test sets. This oversampling makes sense for the training set, since we want a balanced sample to be used for training the model. This also certainly made the predictive task easier, since a trivial predictor -- one that predicts no tweets are censored -- on the entire dataset would have been 99.97\% accurate while only 75\% accurate on our test set. 
+Our data are split into training, validation, and test sets using the procedure described in Section~\ref{sec:data}. We purposely oversampled censored tweets (by including literally all of them) in our training, validation, and test sets. This oversampling makes sense for the training set, since we want a balanced sample to be used for training the model. This also certainly made the predictive task easier, since a trivial predictor -- one that predicts no tweets are censored -- on the entire dataset would have been 99.97\% accurate while only 75\% accurate on our test set. 
 
 The features we chose to include in our model can be categorized into two types: the actual text of the tweet and metadata about the tweet. For the text, we either used a simple bag-of-words representation with term frequency-inverse document frequency (tf-idf) weighting or a latent Dirichlet allocation (LDA) topic model to represent each tweet. 
 
@@ -206,6 +206,9 @@ Existing studies could be done because of data collection strategy. All of these
     BoW 1451 + Meta (SVM, C=1) & 93.33\% \\
     BoW 12891 + Meta (Logit, C=1) & 93.28\% \\
     BoW all only (Logit, C=1) & 73.42\% \\
+    LDA 50 + Meta (SVM, C=1) & 93.19\% \\
+    LDA 10 + Meta (Logit, C=1) & 93.14\% \\
+    LDA 10 only (Logit, C=1) & 74.44\% \\
     Meta only (Logit, C=1) & 93.10\% \\
     Trivial predictor & 75\%
   \end{tabular}
