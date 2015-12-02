@@ -223,7 +223,12 @@ Every model that includes meta features show better performance than the trivial
 
 Including the Bag of Words (BoW) features on top of the meta features only improve around 0.2\% of performance. If we include only the BoW features without meta features, the model performance is even worse than trivial predictor. Comparing this result with past studies emphasizing key words that are likely to deleted, it implies that choosing specific words in the features is better for prediction than simple bag-of-words representation. LDA features also show minimal improvement (around 0.04-0.09\%). Since one tweet can only contain 140 characters, topic models do not perform well than longer documents. The low level of performance reflects this weakness of topic models on short documents. Another problem is that LDA only catches 2-5 relevant topics that are likely to be censored. Other topics do not include useful information, but increase dimensionality of the feature vectors. 
 
+
 It is unclear how generalizable our results are, though they are in all likelihood not particularly generalizable. The original dataset itself does not consist of a random sample of Chinese Weibo users, so our current results might only apply to popular Weibo users (or Weibo users that were popular in 2012). In addition, one might argue that some of 
+
+In conclusion, the finding from this prediction task inform us that red-flagged users and tweets that are more popular have higher probability to be deleted. Collecting user past tweeting behavior and current retweet status can be used for real-time prediction task.  Does this finding mean text information is useless for censorship prediction? The result here implies that including a relevant text feature is important for prediction. Better selection of keywords is one way to improve the text feature. Another way is to train a classifier on censored and uncensored documents on train set, and make the classifier to classify documents on validation and test sets. 
+
+
 \bibliographystyle{abbrv}
 \bibliography{writeup}
 
