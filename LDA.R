@@ -187,8 +187,9 @@ svm.errors <- rep(0, length(costs))
 logit.errors <- rep(0, length(costs))
 
 for (i in 1:length(costs)) {
-    ## 1451 terms
-    dtm <- removeSparseTerms(text.dtm, 0.999)
+    ## 1451 terms (.999)
+    ## 12849 terms (.9999)
+    dtm <- removeSparseTerms(text.dtm, 0.9999)
     ## dtm <- text.dtm
     
     train.text.dtm <- dtm[1:nrow(train),]
@@ -201,11 +202,11 @@ for (i in 1:length(costs)) {
 
     ## train
     print(costs[i])
-    svm.model <- LiblineaR(train.data[[1]], train.data[[2]], type = 1, cost = costs[i])
-    pred.svm <- predict(svm.model, valid.data[[1]])
-    svm.error <- findError(pred.svm, valid.data[[2]])
-    print(paste("SVM:", svm.error))
-    svm.errors[i] <- svm.error
+    ## svm.model <- LiblineaR(train.data[[1]], train.data[[2]], type = 1, cost = costs[i])
+    ## pred.svm <- predict(svm.model, valid.data[[1]])
+    ## svm.error <- findError(pred.svm, valid.data[[2]])
+    ## print(paste("SVM:", svm.error))
+    ## svm.errors[i] <- svm.error
     logit.model <- LiblineaR(train.data[[1]], train.data[[2]], type = 0, cost = costs[i])
     pred.logit <- predict(logit.model, valid.data[[1]])
     logit.error <- findError(pred.logit, valid.data[[2]])
@@ -230,7 +231,7 @@ plot(svm.df, log="x", type="o",
 lines(logit.df, log="x", type = "o", pch = 0, lty = 2,  col = "blue")
 lines(jsvm.df, log="x", type = "o", pch = 2, lty = 3, col = "red")
 lines(jlogit.df, log="x", type = "o", pch=3, lty=4, col = "orange")
-legend(1e-4, 0.90, lty = c(1, 2,3,4), pch = c(1,0,2,3), col=c("black", "blue", "red", "orange"), c("BoW SVM (1451 terms)", "BoW Logit (1451 terms)", "LDA SVM (50 topics)", "LDA Logit (50 topics)"))
+legend(1e-4, 0.90, lty = c(1, 2,3,4), pch = c(1,0,2,3), col=c("black", "blue", "red", "orange"), c("BoW SVM (1451 terms)", "BoW Logit (12849 terms)", "LDA SVM (50 topics)", "LDA Logit (50 topics)"))
 
 dev.off()
 
