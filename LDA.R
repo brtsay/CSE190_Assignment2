@@ -184,7 +184,7 @@ svm.errors <- rep(0, length(costs))
 logit.errors <- rep(0, length(costs))
 
 for (i in 1:length(costs)) {
-    dtm <- removeSparseTerms(text.dtm, 0.99)
+    dtm <- removeSparseTerms(text.dtm, 0.999)
     ## dtm <- text.dtm
     
     train.text.dtm <- dtm[1:nrow(train),]
