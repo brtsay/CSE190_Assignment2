@@ -113,6 +113,29 @@ The segmentation task therefore becomes a machine learning problem where the mod
 
 One baseline we can then use is just the bag-of-words representation of each tweet, with all 229,334 terms and tf-idf weighting. The baseline accuracy for this simple representation is 76.23\% on the validation set, only slightly better than the trivial predictor (75\% accuracy).
 
+In an attempt to capture latent topics underlying tweets, we use LDA to express tweets as a mixture of topics. These topics do appear to have captured relevant terms. For example, with 50 topics, the three highest-weighted topics can be seen in 
+
+\begin{table*}
+  \centering
+  \begin{tabular}{l|l|l}
+    1 & 2 & 3 \\
+    \hline
+    link (holder to replace URLs) & 人民 (people) & 国家 (nation) \\
+    书记 (secretary) & 政府 (government) & 领导 (leader) \\
+    网友 (netizen) & 网络 (network) & 官员 ([government] official)\\
+    中央 (central) & 重庆 (Chongqing) & 政治 (politics )\\
+    要求 (demands) & 警察 (police) & 公开 (open) \\
+    调查 (inspect) & 日报 (times [newspaper]) & 财产 (financial assets) \\
+    干部 (cadre) & 法律 (law) & 公布 (publicize) \\
+    信息 (information) & 群众 (masses) & 百姓 (common people)\\
+    发表 (issue) & 行为 (behavior) & 老百姓 (common people) \\
+    十八 (18) & 公安 (public security) & 体制 (system) 
+  \end{tabular}
+  \caption{Highest-Weighted Topics, $k$=50}
+  \label{tab:lda}
+\end{table*}
+
+
 We also incorporate metadata about the tweets (user information, time information, etc.) into our features. We created the following feature vector from \textbf{only} the training data:
 \begin{enumerate}
 \item The proportion of the user's tweets that have been censored.
@@ -124,6 +147,11 @@ We also incorporate metadata about the tweets (user information, time informatio
 There used to be a sixth feature that indicated the number of times that a retweeted message has been censored. However, since our subsample is only a tiny subset of the entire dataset, this value was always 0.
 
 We create these features for the following reasons. A user who is censored more is likely to tweet things that are flagged for censorship (both in our dataset and in the future). Censors are more likely to care about popular tweets and users -- which tend to mean a greater audience -- than they care about unpopular tweets and users, who less people are likely to see. There are certain days (time periods) where there is some event that leads to greater discussion on Weibo and in turn greater censorship by the authorities. 
+
+When we train using only these features, we get a surprising baseline 93.19\% accuracy on the validation set. This strange result will be discussed in Section~\ref{sec:res}. 
+
+For this binary classification task, we didn't do anything fancy; we used L2-regularized logistic regression and SVM as implemented in the LIBLINEAR package. 
+
 \section{Model}
 \begin{figure}
   \centering
@@ -160,7 +188,7 @@ The development of text mining has opened a new research topic in studying Chine
 Existing studies could be done because of data collection strategy. All of these studies revisit their target websites multiple times to detect government censorship. To compare the relative frequency of each keyword occurrence in censored and uncensored messages, $\chi^2$ feature selection algorithm to calculate the relative frequency is used \cite{Fu2013a}. Using keywords to predict censorship is intuitive, but this method lacks contexts for each keyword. To overcome this problem, classifying documents by content area using supervised model is the state-of-the art method in this area of research. To classify massive of amount of data, multiple human coders classify a sample of documents and make the model aggregate and classify the remaining documents \cite{king2013censorship}.\footnote{King et al. 2013 \cite{king2013censorship} uses ReadMe \cite{hopkins2010method} method which is a non-parametric approach for characterizing distribution of classes. It requires fewer assumptions than other methods. Especially, it does not need random sample of documents. Without making Naive Bayes like assumption, this algorithm examines joint distribution of characteristics  and focuses on distributions makes this analysis possible.} Our paper was motivated by the fact that the newest research on this topic considers content area and topic seriously.
 
 
-\section{Results}
+\section{Results} \label{sec:res}
 \begin{table}
   \centering
   \begin{tabular}{l|c}
@@ -169,12 +197,15 @@ Existing studies could be done because of data collection strategy. All of these
     BoW 1451 (SVM, C=1) & 93.33\% \\
     BoW, 12891 (Logit, C=1) & 93.28\% \\
     BoW only (Logit, C=1) & 73.42\% \\
-    Meta feat only (Logit, C=1) & 93.10\%
+    Meta feat only (Logit, C=1) & 93.10\% \\
+    Trivial predictor & 75\%
   \end{tabular}
   \caption{Results}
   \label{tab:results}
 \end{table}
+Results are seen in Table~\ref{tab:results}. 
 
+The main issue is the fact that our baseline using only the meta features of a tweet is so high. One potential reason for this is the fact that we included too many censored tweets in our training set. By including 50\% of all the censored tweets in the entire 220 million tweet dataset within the training set, we may have given the model too much meta information to work with. The major drivers behind the high accuracy are the first (proportion of user's tweets that have been censored) and fifth (proportion of retweeted user's tweets that have been censored) features. In terms of online/real-time learning, these features are slightly unrealistic, since they allow us to sort of ``see into both the past and future'', since these tweets cover the entirety of 2012. 
 
 \bibliographystyle{abbrv}
 \bibliography{writeup}
