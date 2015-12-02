@@ -109,6 +109,8 @@ mergeFeatures <- function(set, feat, text.dtm) {
 
 findError <- function(pred, true) {sum(abs(pred$predictions - true)/length(true))}
 
+## baseline
+
 ## loop for multiple sparseness
 ## sparseness <- c(0.99, 0.999, 0.9999, 0.99999)
 ## 48, 1451, 12849, 66771
@@ -168,6 +170,7 @@ logit.terms.cost <- logit.terms.cost[order(logit.terms.cost$num.terms),]
 save(svm.nterms, file = "svm_nterms.RData")
 
 
+
 png("/media/b/DEF8DBF5F8DBC9C3/Users/B T/Copy/CSE190/Assignment/CSE190_Assignment2/valid_numTerms.png")
 
 plot(svm.terms.cost, type='o', log = "x",
@@ -184,6 +187,7 @@ svm.errors <- rep(0, length(costs))
 logit.errors <- rep(0, length(costs))
 
 for (i in 1:length(costs)) {
+    ## 1451 terms
     dtm <- removeSparseTerms(text.dtm, 0.999)
     ## dtm <- text.dtm
     
@@ -213,13 +217,20 @@ for (i in 1:length(costs)) {
 logit.df <- data.frame(costs, (1-logit.errors))
 svm.df <- data.frame(costs, (1-svm.errors))
 
-png("/media/b/DEF8DBF5F8DBC9C3/Users/B T/Copy/CSE190/Assignment/CSE190_Assignment2/valid_cost48.png")
+## attach John's errors.Rdata
+attach("errors.Rdata")
+jlogit.df <- data.frame(costs, (1-logit.errors.costs))
+jsvm.df <- data.frame(costs, (1-svm.errors.costs))
+
+png("/media/b/DEF8DBF5F8DBC9C3/Users/B T/Copy/CSE190/Assignment/CSE190_Assignment2/valid_cost.png")
 
 plot(svm.df, log="x", type="o",
-     main="Validation Set Accuracy (48 Terms)",
+     main="Validation Set Accuracy (Cost)",
      xlab = "Cost", ylab = "Accuracy")
 lines(logit.df, log="x", type = "o", pch = 0, lty = 2,  col = "blue")
-legend(1e-4, 0.910, lty = c(1, 2), pch = c(1,0), col=c("black", "blue"),c("SVM (L2)", "Logistic (L2)"))
+lines(jsvm.df, log="x", type = "o", pch = 2, lty = 3, col = "red")
+lines(jlogit.df, log="x", type = "o", pch=3, lty=4, col = "orange")
+legend(1e-4, 0.90, lty = c(1, 2,3,4), pch = c(1,0,2,3), col=c("black", "blue", "red", "orange"), c("BoW SVM (1451 terms)", "BoW Logit (1451 terms)", "LDA SVM (50 topics)", "LDA Logit (50 topics)"))
 
 dev.off()
 
