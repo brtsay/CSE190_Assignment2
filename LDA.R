@@ -302,10 +302,13 @@ test.y[is.na(test.y)] <- 0
 ## logit.model <- LiblineaR(train.data[[1]], train.data[[2]])
 ## logit.model <- LiblineaR(prepareMatrix(train.text.dtm), train.data[[2]])
 logit.model <- LiblineaR(train.feat, train.y)
-pred.logit <- predict(logit.model, valid.feat)
-logit.error <- findError(pred.logit, valid.y)
-## pred.logit <- predict(logit.model, test.data[[1]])
-## logit.error <- findError(pred.logit, test.data[[2]])
+## logit.error <- findError(pred.logit, valid.data[[2]])
+## pred.logit <- predict(logit.model, valid.data[[1]])
+## pred.logit <- predict(logit.model, prepareMatrix(test.text.dtm))
+pred.logit <- predict(logit.model, test.feat)
+logit.error <- findError(pred.logit, test.y)
+
+
 
 
 y <- set$permission_denied
@@ -315,9 +318,15 @@ svm.model <- LiblineaR(train.data[[1]], train.data[[2]], type = 1)
 pred.svm <- predict(svm.model, test.data[[1]])
 svm.error <- findError(pred.svm, test.data[[2]])
 
+## test
 ## svm bow 1451 terms error: 0.06731279, 93.33%
-## logit bow 12891 terms error: 0.06817351, 93.18%
-## logit bow all terms only error: 0.2658201, 73.42\%
+## logit bow 12891 terms error: 0.06719568, 93.28%
+## logit bow all terms only error:0.2658201 73.42%
+## logit feat only error:0.06897528, 93.10\%
+
+## valid
+## logit bow all terms only error: 0.2376197, 76.24\%
+## logit feat only error: 0.06812715, 93.19\%
 
 ## baselines
 b.terms <- c("重庆", "光诚", "陈光诚", "两会", "骆家辉", "辟谣", "代表", "薄", "日报", "公布财产", "北京日报", "薄熙来", "人大代表", )

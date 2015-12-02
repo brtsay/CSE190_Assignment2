@@ -61,7 +61,7 @@ The data used for this assignment is taken from the \href{http://weiboscope.jmsc
 
 Figure~\ref{fig:wordcloud} shows the word clouds for the noncensored tweets (left) and for the censored tweets (right). Some terms are found often in both sets, namely 轉發微博 (retweet), 哈哈 (haha), 中国人 (Chinese people), and 越来越 (more and more). 
 
-However, censored tweets tend to be much more political. 钓鱼岛 (Diaoyu Islands) refer to the disputed island chains. 斯巴达 (Sparta) is actually a play on the fact that Sparta in Chinese (sibada) is nearly a homophone for 十八大 (shibada), the 18th National Party Congress where the previous president Hu Jintao stepped down and the current president -- Xi Jinping -- took his place.\footnote{Chinese internet users often rely on homophone tricks such as these to evade automatic keyword censoring. In this case, we can see that it was not 100\% effective.} There tend to be more people names in the censored tweets, such as 毛泽东 (Mao Zedong, former chairman of the Chinese Communist Party), 薄熙来 (Bo Xilai, disgraced Chongqing party chief), 王立军 (Wang Lijun, vice-mayor of Chongqing under Bo), and others. There are also references to the Chinese government, such as 领导人 (leadership) and 共产党 (Communist Party), and the masses (老百姓).
+However, censored tweets tend to be much more political. 钓鱼岛 (Diaoyu Islands) refer to the disputed island chains between China and Japan. 斯巴达 (Sparta) is actually a play on the fact that Sparta in Chinese (sibada) is nearly a homophone for 十八大 (shibada), the 18th National Party Congress where the previous president Hu Jintao stepped down and the current president -- Xi Jinping -- took his place.\footnote{Chinese internet users often rely on homophone tricks such as these to evade automatic keyword censoring. In this case, we can see that it was not 100\% effective.} There tend to be more people names in the censored tweets, such as 毛泽东 (Mao Zedong, former chairman of the Chinese Communist Party), 薄熙来 (Bo Xilai, disgraced Chongqing party chief), 王立军 (Wang Lijun, vice-mayor of Chongqing under Bo), and others. There are also references to the Chinese government, such as 领导人 (leadership) and 共产党 (Communist Party), and the masses (老百姓).
 
 In comparison, the noncensored tweets appear much more benign. One of the most common terms is 奥特曼, which refers to the fictional Japanese superhero Ultraman, who is apparently quite popular among a certain generation in China. Many popular terms are simply astrology zodiac signs e.g. Leo (狮子座), Sagittarius (射手座), etc. The astrology most likely comes from a bot or person that tweets horoscopes every day.\footnote{Astrology is actually fairly \href{https://newrepublic.com/article/119500/chinese-astrology-surprising-prominence-horoscopes}{popular in China}.} The popularity of the term Ultraman can perhaps be attributed to the creation of a noodle-robot that looked \href{http://asiasociety.org/blog/asia/video-when-going-gets-tough-superhero-robot-turns-noodle-making}{like Ultraman in 2012}. The conclusion would be that we should look for more overtly political words to classify censored tweets.
 
@@ -111,7 +111,7 @@ Another major difference between Chinese and English is that Chinese is a ideogr
 
 The segmentation task therefore becomes a machine learning problem where the model tries to predict what type of $n$-gram a word is. When the segmenter encounters a word like 電腦, it must decide whether this is a bigram (computer) or two unigrams (electric brain). We had our hands full with our actual predictive task, so we used the basic Chinese segmenter provided in the \href{http://nlp.stanford.edu/software/segmenter.shtml}{Stanford Word Segmenter} \cite{Chang2008}. After segmentation, we removed punctuation and numbers.
 
-One baseline we can then use is just the bag-of-words representation of each tweet, with all 229,334 terms and tf-idf weighting. The baseline accuracy for this simple representation is 76.23\%, only slightly better than the trivial predictor (75\% accuracy).
+One baseline we can then use is just the bag-of-words representation of each tweet, with all 229,334 terms and tf-idf weighting. The baseline accuracy for this simple representation is 76.23\% on the validation set, only slightly better than the trivial predictor (75\% accuracy).
 
 We also incorporate metadata about the tweets (user information, time information, etc.) into our features. We created the following feature vector from \textbf{only} the training data:
 \begin{enumerate}
@@ -123,6 +123,7 @@ We also incorporate metadata about the tweets (user information, time informatio
 \end{enumerate}
 There used to be a sixth feature that indicated the number of times that a retweeted message has been censored. However, since our subsample is only a tiny subset of the entire dataset, this value was always 0.
 
+We create these features for the following reasons. A user who is censored more is likely to tweet things that are flagged for censorship (both in our dataset and in the future). Censors are more likely to care about popular tweets and users -- which tend to mean a greater audience -- than they care about unpopular tweets and users, who less people are likely to see. There are certain days (time periods) where there is some event that leads to greater discussion on Weibo and in turn greater censorship by the authorities. 
 \section{Model}
 \begin{figure}
   \centering
@@ -160,6 +161,20 @@ Existing studies could be done because of data collection strategy. All of these
 
 
 \section{Results}
+\begin{table}
+  \centering
+  \begin{tabular}{l|c}
+    Model & Test Accuracy \\
+    \hline 
+    BoW 1451 (SVM, C=1) & 93.33\% \\
+    BoW, 12891 (Logit, C=1) & 93.28\% \\
+    BoW only (Logit, C=1) & 73.42\% \\
+    Meta feat only (Logit, C=1) & 93.10\%
+  \end{tabular}
+  \caption{Results}
+  \label{tab:results}
+\end{table}
+
 
 \bibliographystyle{abbrv}
 \bibliography{writeup}

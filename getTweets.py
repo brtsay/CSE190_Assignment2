@@ -219,7 +219,7 @@ def createFeatures(data_path, train_path):
     # 2: num times message has been retweeted
     # 3: proportion of tweets censored that day
     # 4: proportion of retweeted user's tweets that have been censored
-    # 5: num times retweeted message has been censored
+    # 5: num times retweeted message has been censored (don't include)
     features = []
     for obs in data:
         uid = obs.decode('latin-1').split(',')[2]
@@ -247,9 +247,16 @@ def createFeatures(data_path, train_path):
             cens_rmid = cen_mid[re_rmid]
         except KeyError:
             cens_rmid = 0
-        features.append([cens_uid, re_ruid, re_rmid, day_prop, cens_ruid, cens_rmid])
+        features.append([cens_uid, re_ruid, re_rmid, day_prop, cens_ruid])
     return(features)
 
+# a = createFeatures('/home/b/Documents/CSE190_Data/pre_test.csv', '/home/b/Documents/CSE190_Data/pre_train.csv')
+# with open("/home/b/Documents/CSE190_Data/test_feat.csv", 'w') as f:
+#     writer = csv.writer(f)
+#     for item in a:
+#         writer.writerow(item)
+
+## time series plot
 paths = ['/home/b/Documents/CSE190_Data/pre_train.csv', '/home/b/Documents/CSE190_Data/pre_valid.csv', '/home/b/Documents/CSE190_Data/pre_test.csv']
 day_ts = defaultdict(dict)
 for path in paths:
@@ -293,8 +300,5 @@ plt.legend()
 plt.savefig('tweetTime.png')
 # plt.show()
 
-# with open("/home/b/Documents/CSE190_Data/valid_feat.csv", 'w') as f:
-#     writer = csv.writer(f)
-#     for item in a:
-#         writer.writerow(item)
+
 
