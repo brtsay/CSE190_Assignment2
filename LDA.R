@@ -299,11 +299,11 @@ test.y <- test$permission_denied
 test.y[is.na(test.y)] <- 0
 
 ## train
-## logit.model <- LiblineaR(train.data[[1]], train.data[[2]])
+logit.model <- LiblineaR(train.data[[1]], train.data[[2]])
 ## logit.model <- LiblineaR(prepareMatrix(train.text.dtm), train.data[[2]])
-logit.model <- LiblineaR(train.feat, train.y)
+## logit.model <- LiblineaR(train.feat, train.y)
 ## logit.error <- findError(pred.logit, valid.data[[2]])
-## pred.logit <- predict(logit.model, valid.data[[1]])
+pred.logit <- predict(logit.model, test.data[[1]])
 ## pred.logit <- predict(logit.model, prepareMatrix(test.text.dtm))
 pred.logit <- predict(logit.model, test.feat)
 logit.error <- findError(pred.logit, test.y)
@@ -329,7 +329,13 @@ svm.error <- findError(pred.svm, test.data[[2]])
 ## logit feat only error: 0.06812715, 93.19\%
 
 ## baselines
-b.terms <- c("重庆", "光诚", "陈光诚", "两会", "骆家辉", "辟谣", "代表", "薄", "日报", "公布财产", "北京日报", "薄熙来", "人大代表", )
+b.terms <- c("重庆", "光诚", "陈光诚", "两会", "骆家辉", "辟谣", "代表", "薄", "日报", "公布财产", "北京日报", "薄熙来", "人大代表", "骆家辉公布", "财产", "转发", "转", "王立军", "求证", "转发微博", "请骆家辉", "书记", "转么", "鬼子转", "公布", "求辟谣", "删", "陈", "微博", "养老不")
+train.pred <- as.integer(grepl(paste(b.terms, collapse = "|"), train$text))
+terror <- sum(abs(train.pred-train.y))/nrow(train)
+valid.pred <- as.integer(grepl(paste(b.terms, collapse = "|"), valid$text))
+verror <- sum(abs(valid.pred-valid.y))/nrow(valid)
+test.pred <- as.integer(grepl(paste(b.terms, collapse = "|"), test$text))
+testerror <- sum(abs(test.pred-test.y))/nrow(test)
 
 ## wordcloud
 stopwords.temp <- c(stopwords, "link", "the", "via")
