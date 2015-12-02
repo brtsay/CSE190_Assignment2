@@ -107,13 +107,13 @@ The features we chose to include in our model can be categorized into two types:
 
 Processing Chinese text data is not exactly the same as processing English text. One of the major differences is that there are no spaces in Chinese text, so spaces must first be inserted between words in each document before a bag-of-words representation can be made. This process is known as segmentation. 
 
-Another major difference between Chinese and English is that Chinese is a ideogram-based language while English is an alphabet-based language. This creates problems for determining where to insert spaces. Consider the following example. The word 電 means electricity, and the word 腦 means brain. However, combining the two words yields 電腦, which means computer.
+Another major difference between Chinese and English is that Chinese is a ideogram-based language while English is an alphabet-based language. This creates problems for determining where to insert spaces. Consider the following example. The word 電 means electric and the word 腦 means brain. However, combining the two words yields 電腦, which means computer.
 
-The segmentation task therefore becomes a machine learning problem where the model tries to predict what type of $n$-gram a word is. When the segmenter encounters a word like 電腦, it must decide whether this is a bigram (computer) or two unigrams (electric brain). We had our hands full with our actual predictive task, so we used the basic Chinese segmenter provided in the \href{http://nlp.stanford.edu/software/segmenter.shtml}{Stanford Word Segmenter} \cite{Chang2008}. After segmentation, we removed punctuation and numbers.
+The segmentation task therefore becomes a machine learning problem where the model tries to predict what type of $n$-gram a word is. When the segmenter encounters a word like 電腦, it must decide whether this is a bigram (computer) or two unigrams (electric brain).\footnote{This example is somewhat stupid since it's unlikely for anyone to be talking about electric brains, but the basic point still stands.} We had our hands full with our actual predictive task, so we used the basic Chinese segmenter provided in the \href{http://nlp.stanford.edu/software/segmenter.shtml}{Stanford Word Segmenter} \cite{Chang2008}. After segmentation, we removed punctuation and numbers.
 
 One baseline we can then use is just the bag-of-words representation of each tweet, with all 229,334 terms and tf-idf weighting. The baseline accuracy for this simple representation is 76.23\% on the validation set, only slightly better than the trivial predictor (75\% accuracy).
 
-In an attempt to capture latent topics underlying tweets, we use LDA to express tweets as a mixture of topics. These topics do appear to have captured relevant terms. For example, with 50 topics, the three highest-weighted topics can be seen in 
+In an attempt to capture latent topics underlying tweets, we use LDA to express tweets as a mixture of topics. These topics do appear to have captured relevant terms. For example, with 50 topics, the three highest-weighted topics can be seen in table~\ref{table:lda}
 
 \begin{table*}
   \centering
@@ -150,15 +150,17 @@ We create these features for the following reasons. A user who is censored more 
 
 When we train using only these features, we get a surprising baseline 93.19\% accuracy on the validation set. This strange result will be discussed in Section~\ref{sec:res}. 
 
-For this binary classification task, we didn't do anything fancy; we used L2-regularized logistic regression and SVM as implemented in the LIBLINEAR package. 
-
 \section{Model}
+For this binary classification task, we didn't do anything fancy; we used L2-regularized logistic regression and SVM as implemented in the \textsf{LIBLINEAR} library \cite{Fan2008}. For SVM, we did not use any kernel (like the ones provided in the \textsf{LIBSVM} library) since we wanted to keep training time short. A linear classifier is particularly appropriate for our bag-of-words representations, where both the number of instances and features are fairly large. With such a high-dimensional feature space, it is unlikely that mapping such data into even higher-dimensional space would have yielded increases in accuracy.
+
 \begin{figure}
   \centering
   \includegraphics[scale=0.5]{valid_numTerms.png}
   \caption{Tuning Bag-of-Words Sparsity}
   \label{fig:sparse}
 \end{figure}
+
+Ideally we would have used grid search or something more rigorous to tune our hyperparameters (the number of terms for bag-of-words and the number of topics for LDA). Instead, we optimized the number of terms and topics first before optimizing the cost.
 
 When the bag-of-words representation for text was initially created, it contained 229,334 terms. We hypothesize that many of these terms might be completely useless or even detrimental to the model by inducing overfitting. We therefore attempted some dimension reduction via just dropping infrequent terms and by applying LDA (discussed later). Infrequent terms were removed based on their sparsity, using maximum allowed sparseness values of 0.99, 0.995, 0.999, 0.9999, 0.99999, and 1 (all terms included). These correspond to 48, 141, 1451, 12849, 66771, and 229334 terms, respectively. Figure~\ref{fig:sparse} shows the results from tuning the number of terms to include in the basic bag-of-words representation of tweets. 
 
@@ -172,7 +174,14 @@ Indeed, there is a small reduction in error on the validation set when we reduce
 \end{figure}
 The results from tuning the number of topics $k$ is shown in Figure~\ref{fig:LDA}.
 
-The results from tuning the cost parameters are shown in Figure~\ref{fig:cost}.
+The costs are imposed on the logistic regression and SVM models to prevent overfitting. For both, the cost $C$ is applied in the following optimization problem
+\begin{equation}
+  \label{eq:svm}
+  \min_w \frac{1}{2} \mathbf{w}^T\mathbf{w} + C \sum_{i=1}^l \xi(\mathbf{w}; \mathbf{x}_i; y_i)
+\end{equation}
+where $\mathbf{w}$ refers to the weight vector, $(\mathbf{x}_i$, $y_i)$ is the set of instance-label pairs for $i=1, \ldots, l$, and $\mathbf{x}_i \in R^n$ and $y_i \in \{-1,1\}$. The loss function $\xi(\cdot)$ is $\max(1-y_i\mathbf{w}^T\mathbf{x}_i,0)^2$ for L2-SVM and $\log(1+e^{-y_i\mathbf{w}^T\mathbf{x}_i})$ for L2-logistic regression. For SVM, the cost $C$ represents the tradeoff between maximizing the margin on the training set (overfitting?) and minimizing the classification error. For logistic regression, the cost $C$ penalizes overly large (in magnitude) weight vectors.
+
+The results from tuning the cost parameters are shown in Figure~\ref{fig:cost}. Most of the models have very similar accuracies, which is unsurprising given the fact that much of the models' predictive power comes from the meta features. The best performance seems to be achieved for costs between 0.001 and 100, though the differences are slight. SVM tends to experience a relatively large dropoff in accuracy for costs of 100 and above, perhaps implying that accuracy is being sacrificed to maximize the margin. Logistic regression doesn't seem to experience these effects, perhaps implying that the weights were not growing large in magnitude to begin with. Lower costs also hurt logistic regression relatively more than SVM, perhaps implying that at least some overfitting on the training set is occurring. It should be noted that tuning the cost actually does very little in absolute terms, since the difference in accuracy rate is generally around 0.01\%, corresponding to roughly 80 tweets in our validation set.
 
 \begin{figure}
   \centering
@@ -209,4 +218,7 @@ The main issue is the fact that our baseline using only the meta features of a t
 
 \bibliographystyle{abbrv}
 \bibliography{writeup}
+
+\appendix
+Code for this project can be found on our \href{https://github.com/brtsay/CSE190_Assignment2}{Github page}.
 \end{document}
