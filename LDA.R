@@ -174,7 +174,7 @@ save(svm.nterms, file = "svm_nterms.RData")
 png("/media/b/DEF8DBF5F8DBC9C3/Users/B T/Copy/CSE190/Assignment/CSE190_Assignment2/valid_numTerms.png")
 
 plot(svm.terms.cost, type='o', log = "x",
-     main = "Validation Set Accuracy (Cost = 1)",
+     main = "Validation Set Accuracy BoW (Cost = 1)",
      xlab = "Number of Terms", ylab = "Accuracy")
 lines(logit.terms.cost, type="o", pch = 0, lty=2, col = "blue")
 legend(50, 0.926, lty = c(1, 2), pch = c(1,0), col=c("black", "blue"),c("SVM (L2)", "Logistic (L2)"))
@@ -187,8 +187,8 @@ svm.errors <- rep(0, length(costs))
 logit.errors <- rep(0, length(costs))
 
 for (i in 1:length(costs)) {
-    ## 1451 terms
-    dtm <- removeSparseTerms(text.dtm, 0.999)
+    ## 1451 terms 0.999
+    dtm <- removeSparseTerms(text.dtm, 0.9999)
     ## dtm <- text.dtm
     
     train.text.dtm <- dtm[1:nrow(train),]
@@ -201,11 +201,11 @@ for (i in 1:length(costs)) {
 
     ## train
     print(costs[i])
-    svm.model <- LiblineaR(train.data[[1]], train.data[[2]], type = 1, cost = costs[i])
-    pred.svm <- predict(svm.model, valid.data[[1]])
-    svm.error <- findError(pred.svm, valid.data[[2]])
-    print(paste("SVM:", svm.error))
-    svm.errors[i] <- svm.error
+    ## svm.model <- LiblineaR(train.data[[1]], train.data[[2]], type = 1, cost = costs[i])
+    ## pred.svm <- predict(svm.model, valid.data[[1]])
+    ## svm.error <- findError(pred.svm, valid.data[[2]])
+    ## print(paste("SVM:", svm.error))
+    ## svm.errors[i] <- svm.error
     logit.model <- LiblineaR(train.data[[1]], train.data[[2]], type = 0, cost = costs[i])
     pred.logit <- predict(logit.model, valid.data[[1]])
     logit.error <- findError(pred.logit, valid.data[[2]])
@@ -230,11 +230,20 @@ plot(svm.df, log="x", type="o",
 lines(logit.df, log="x", type = "o", pch = 0, lty = 2,  col = "blue")
 lines(jsvm.df, log="x", type = "o", pch = 2, lty = 3, col = "red")
 lines(jlogit.df, log="x", type = "o", pch=3, lty=4, col = "orange")
-legend(1e-4, 0.90, lty = c(1, 2,3,4), pch = c(1,0,2,3), col=c("black", "blue", "red", "orange"), c("BoW SVM (1451 terms)", "BoW Logit (1451 terms)", "LDA SVM (50 topics)", "LDA Logit (50 topics)"))
+legend(1e-4, 0.90, lty = c(1, 2,3,4), pch = c(1,0,2,3), col=c("black", "blue", "red", "orange"), c("BoW SVM (1451 terms)", "BoW Logit (12489 terms)", "LDA SVM (50 topics)", "LDA Logit (50 topics)"))
 
 dev.off()
 
+## topic tuning k
+k <- c(10, 20, 50, 70)
 
+png("valid_k.png")
+plot(k, (1-svm.errors.k), type = "o", ylim = c(.924, .934),
+     main = "Validation Set Accuracy LDA (Cost = 1)",
+     xlab = "Number of Topics", ylab = "Accuracy")
+lines(k, (1-logit.errors.k), type = "o", pch = 0, lty = 2, col = "blue")
+legend(10,.926, lty = c(1,2), pch = c(1,0), col = c("black", "blue"), c("SVM (L2)", "Logit (L2)"))
+dev.off()
 
 
 ## dtm <- removeSparseTerms(text.dtm, 0.9999)

@@ -116,12 +116,32 @@ The easiest baseline to beat would be the trivial predictor that predcts that ev
 \section{Model}
 \begin{figure}
   \centering
+  \includegraphics[scale=0.5]{valid_numTerms.png}
+  \caption{Tuning Sparsity}
+  \label{fig:sparse}
+\end{figure}
+
+When the bag-of-words representation for text was initially created, it contained 229,334 terms. We hypothesize that many of these terms might be completely useless or even detrimental to the model by inducing overfitting. We therefore attempted some dimension reduction via just dropping infrequent terms and by applying LDA (discussed later). Infrequent terms were removed based on their sparsity, using maximum allowed sparseness values of 0.99, 0.995, 0.999, 0.9999, 0.99999, and 1 (all terms included). These correspond to 48, 141, 1451, 12849, 66771, and 229334 terms, respectively. Figure~\ref{fig:sparse} shows the results from tuning the number of terms to include in the basic bag-of-words representation of tweets. 
+
+Indeed, there is a small reduction in error on the validation set when we reduce the number of terms. The accuracy for SVM is maximized when we include 1,451 terms instead of the full 229,334 terms. The accuracy for logistic regression is maximized when we have 12,849 terms.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.5]{valid_k.png}
+  \caption{Tuning LDA Topics}
+  \label{fig:LDA}
+\end{figure}
+The results from tuning the number of topics $k$ is shown in Figure~\ref{fig:LDA}.
+
+The results from tuning the cost parameters are shown in Figure~\ref{fig:cost}.
+
+\begin{figure}
+  \centering
   \includegraphics[scale=0.5]{valid_cost.png}
   \caption{Cost Tuning}
   \label{fig:cost}
 \end{figure}
 
-The results from tuning the cost parameters are shown in Figure~\ref{fig:cost}.
 \section{Literature}
 
 \section{Results}
