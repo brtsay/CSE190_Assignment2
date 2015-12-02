@@ -1,13 +1,13 @@
 # CSE190 Assignment 2
 
-## TODO List
-1. Validation error plots
-2. Time series chart of censored/total tweets over time (by day or by week?)
-3. Other models e.g. kNN?
-4. Making some sort of baseline from the [original paper](http://www.computer.org/csdl/mags/ic/2013/03/mic2013030042-abs.html).
-5. Adding word cloud of noncensored tweets.
-6. Adding user attributes e.g. province, gender, verified status, etc.
-7. Translating word clouds (this should literally be the last thing to possibly do).
+<!-- ## TODO List -->
+<!-- 1. Validation error plots -->
+<!-- 2. Time series chart of censored/total tweets over time (by day or by week?) -->
+<!-- 3. Other models e.g. kNN? -->
+<!-- 4. Making some sort of baseline from the [original paper](http://www.computer.org/csdl/mags/ic/2013/03/mic2013030042-abs.html). -->
+<!-- 5. Adding word cloud of noncensored tweets. -->
+<!-- 6. Adding user attributes e.g. province, gender, verified status, etc. -->
+<!-- 7. Translating word clouds (this should literally be the last thing to possibly do). -->
 
 ## Getting the data
 The file **getTweets.py** contains a function that can extract censored and noncensored tweets from the entire dataset. To use it, upload **getTweets.py** to the HNG server and run
@@ -40,7 +40,7 @@ To create the features of tweet metadata, run the `createFeatures` function in *
 6. The number of times that a retweeted message has been censored (for our training set, this will always be 0).
 
 ## Word Cloud
-![Word cloud of censored tweets](https://github.com/brtsay/CSE190_Assignment2/blob/master/wordcloud_cens.png)
+![Word cloud of censored tweets](https://github.com/brtsay/CSE190_Assignment2/blob/master/wc.png)
 
 The last task (if there's time) is to get an English version of the word cloud. Also to compare the censored tweets with the non-censored tweets. "Sparta" is a reference to 十八大, the 18th Party Congress. They are almost homophones in Mandarin.
 
