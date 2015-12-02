@@ -113,7 +113,7 @@ The segmentation task therefore becomes a machine learning problem where the mod
 
 One baseline we can then use is just the bag-of-words representation of each tweet, with all 229,334 terms and tf-idf weighting. The baseline accuracy for this simple representation is 76.23\% on the validation set, only slightly better than the trivial predictor (75\% accuracy).
 
-In an attempt to capture latent topics underlying tweets, we use LDA to express tweets as a mixture of topics. These topics do appear to have captured relevant terms. For example, with 50 topics, the three highest-weighted topics can be seen in table~\ref{table:lda}
+In an attempt to capture latent topics underlying tweets, we use LDA to express tweets as a mixture of topics. These topics do appear to have captured relevant terms. For example, with 50 topics, the three highest-weighted topics can be seen in table~\ref{tab:lda}. As can be seen the highly-weighted topics correspond to sensitive or political terms.
 
 \begin{table*}
   \centering
@@ -160,7 +160,7 @@ For this binary classification task, we didn't do anything fancy; we used L2-reg
   \label{fig:sparse}
 \end{figure}
 
-Ideally we would have used grid search or something more rigorous to tune our hyperparameters (the number of terms for bag-of-words and the number of topics for LDA). Instead, we optimized the number of terms and topics first before optimizing the cost.
+Ideally we would have used grid search or something more rigorous to tune our hyperparameters (the number of terms for bag-of-words and the number of topics for LDA). Instead, we optimized the number of terms and topics first while setting the cost $C=1$. We then fixed the number of topics and terms to the ``optimum'' settings derived from the previous step and then allowed cost to vary.
 
 When the bag-of-words representation for text was initially created, it contained 229,334 terms. We hypothesize that many of these terms might be completely useless or even detrimental to the model by inducing overfitting. We therefore attempted some dimension reduction via just dropping infrequent terms and by applying LDA (discussed later). Infrequent terms were removed based on their sparsity, using maximum allowed sparseness values of 0.99, 0.995, 0.999, 0.9999, 0.99999, and 1 (all terms included). These correspond to 48, 141, 1451, 12849, 66771, and 229334 terms, respectively. Figure~\ref{fig:sparse} shows the results from tuning the number of terms to include in the basic bag-of-words representation of tweets. 
 
