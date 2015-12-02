@@ -261,6 +261,7 @@ model <- LiblineaR(train.data[[1]], train.data[[2]], type=1)
 pred.valid <- predict(model, valid.data[[1]])
 print(findError(pred.valid, valid.data[[2]]))
 
+
 ## SVM
 ## no sparse remove: error = 0.09643682
 ## .99 (17) sparse remove: error = 0.07754799
@@ -270,7 +271,56 @@ print(findError(pred.valid, valid.data[[2]]))
 
 
 
-## pred.train <- predict(model, train.X)
+## results
+## 1451 terms 0.999, 0.9999 12849
+## dtm <- removeSparseTerms(text.dtm, 0.9999)
+
+## for all terms
+prepareMatrix <- function(X) {
+    X <- sparseMatrix(X$i, X$j, x=X$v)
+    X <- as(X, "matrix.csr")
+    return(X)
+}
+
+dtm <- text.dtm
+train.text.dtm <- dtm[1:nrow(train),]
+valid.text.dtm <- dtm[(nrow(train)+1):(nrow(train)+nrow(valid)),]
+test.text.dtm <- dtm[(nrow(train)+nrow(valid)+1):nrow(text.dtm),]
+
+train.data <- mergeFeatures(train, train.feat, train.text.dtm)
+valid.data <- mergeFeatures(valid, valid.feat, valid.text.dtm)
+test.data <- mergeFeatures(test, test.feat, test.text.dtm)
+
+train.y <- train$permission_denied
+train.y[is.na(train.y)] <- 0
+valid.y <- valid$permission_denied
+valid.y[is.na(valid.y)] <- 0
+test.y <- test$permission_denied
+test.y[is.na(test.y)] <- 0
+
+## train
+## logit.model <- LiblineaR(train.data[[1]], train.data[[2]])
+## logit.model <- LiblineaR(prepareMatrix(train.text.dtm), train.data[[2]])
+logit.model <- LiblineaR(train.feat, train.y)
+pred.logit <- predict(logit.model, valid.feat)
+logit.error <- findError(pred.logit, valid.y)
+## pred.logit <- predict(logit.model, test.data[[1]])
+## logit.error <- findError(pred.logit, test.data[[2]])
+
+
+y <- set$permission_denied
+y[is.na(y)] <- 0
+
+svm.model <- LiblineaR(train.data[[1]], train.data[[2]], type = 1)
+pred.svm <- predict(svm.model, test.data[[1]])
+svm.error <- findError(pred.svm, test.data[[2]])
+
+## svm bow 1451 terms error: 0.06731279, 93.33%
+## logit bow 12891 terms error: 0.06817351, 93.18%
+## logit bow all terms only error: 0.2658201, 73.42\%
+
+## baselines
+b.terms <- c("重庆", "光诚", "陈光诚", "两会", "骆家辉", "辟谣", "代表", "薄", "日报", "公布财产", "北京日报", "薄熙来", "人大代表", )
 
 ## wordcloud
 stopwords.temp <- c(stopwords, "link", "the", "via")
