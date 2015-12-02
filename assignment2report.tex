@@ -101,7 +101,7 @@ In other words, there are many factors at play in determining whether a tweet is
 \section{Predictive Task} \label{sec:pred}
 We would like to predict which tweets are censored in this dataset i.e. a binary-class prediction. To evaluate our model, we will simply use classification accuracy -- the proportion of tweets that are labelled correctly. If we were Chinese government censors, then perhaps we would evaluate recall or $F_\beta$ instead.\footnote{Recall that $F_\beta = (1+\beta^2) \cdot \frac{\text{precision} \cdot \text{recall}}{\beta^2 \text{precision} + \text{recall}}$} The idea is that a government censor would prefer flagging a ``harmless'' tweet for censorship over accidentally letting a ``harmful'' tweet through. We are [fortunately] not Chinese government censors, so we will stick with evaluating our model using classification accuracy. 
 
-Our data are split into training, validation, and test sets using the procedure described in Section~\ref{sec:pred}. We purposely oversampled censored tweets (by including literally all of them) in our training, validation, and test sets. This oversampling makes sense for the training set, since we want a balanced sample to be used for training the model. This also certainly made the predictive task easier, since a trivial predictor -- one that predicts no tweets are censored -- on the entire dataset would have been 99.97\% accurate. 
+Our data are split into training, validation, and test sets using the procedure described in Section~\ref{sec:pred}. We purposely oversampled censored tweets (by including literally all of them) in our training, validation, and test sets. This oversampling makes sense for the training set, since we want a balanced sample to be used for training the model. This also certainly made the predictive task easier, since a trivial predictor -- one that predicts no tweets are censored -- on the entire dataset would have been 99.97\% accurate while only 75\% accurate on our test set. 
 
 The features we chose to include in our model can be categorized into two types: the actual text of the tweet and metadata about the tweet. For the text, we either used a simple bag-of-words representation with term frequency-inverse document frequency (tf-idf) weighting or a latent Dirichlet allocation (LDA) topic model to represent each tweet. 
 
@@ -109,9 +109,9 @@ Processing Chinese text data is not exactly the same as processing English text.
 
 Another major difference between Chinese and English is that Chinese is a ideogram-based language while English is an alphabet-based language. This creates problems for determining where to insert spaces. Consider the following example. The word 電 means electricity, and the word 腦 means brain. However, combining the two words yields 電腦, which means computer.
 
-The segmentation task therefore becomes a machine learning problem where the model tries to predict what type of $n$-gram a word is. When the segmenter encounters a word like 電腦, it must decide whether this is a bigram (computer) or two unigrams (electric brain). We had our hands full with our actual predictive task, so we used the basic Chinese segmenter provided in the \href{http://nlp.stanford.edu/software/segmenter.shtml}{Stanford Word Segmenter} \cite{Chang2008}
+The segmentation task therefore becomes a machine learning problem where the model tries to predict what type of $n$-gram a word is. When the segmenter encounters a word like 電腦, it must decide whether this is a bigram (computer) or two unigrams (electric brain). We had our hands full with our actual predictive task, so we used the basic Chinese segmenter provided in the \href{http://nlp.stanford.edu/software/segmenter.shtml}{Stanford Word Segmenter} \cite{Chang2008}. After segmentation, we removed punctuation and numbers.
 
-The easiest baseline to beat would be the trivial predictor that preidcts that every tweet is not censored. This would result in 50\% error on our training
+The easiest baseline to beat would be the trivial predictor that predcts that every tweet is not censored. This would result in 50\% error on our training
 
 \section{Model}
 
