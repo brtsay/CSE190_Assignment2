@@ -1,5 +1,4 @@
-# CSE190 Assignment 2
-
+# Predicting Censorship on Weibo
 <!-- ## TODO List -->
 <!-- 1. Validation error plots -->
 <!-- 2. Time series chart of censored/total tweets over time (by day or by week?) -->
@@ -8,6 +7,8 @@
 <!-- 5. Adding word cloud of noncensored tweets. -->
 <!-- 6. Adding user attributes e.g. province, gender, verified status, etc. -->
 <!-- 7. Translating word clouds (this should literally be the last thing to possibly do). -->
+
+This was a simple project where we tried to see whether we could predict which posts would be censored on Weibo using the [Weiboscope data](https://jmsc.hku.hk/2016/03/weiboscope/). With the way we constructed our training set, we found that user features were far more predictive than the text features themselves.
 
 ## Getting the data
 The file **getTweets.py** contains a function that can extract censored and noncensored tweets from the entire dataset. To use it, upload **getTweets.py** to the HNG server and run
